@@ -13,6 +13,12 @@
 // as `MONGO_URI`. Connect to the database using `mongoose.connect(<Your URI>)`
 
 
+var mongoose = require('mongoose');
+mongoose.connect(process.env.MONGO_URI);
+//var express = require('express');
+//var app = express();
+
+
 /** # SCHEMAS and MODELS #
 /*  ====================== */
 
@@ -38,7 +44,14 @@
 
 // <Your code here >
 
-var Person /* = <Your Model> */
+var Schema = mongoose.Schema;
+var personSchema = new Schema({
+  name : {type: String, required: true},
+  age : Number,
+  favoriteFoods : [String]
+});
+
+var Person = mongoose.model('Person', personSchema);
 
 // **Note**: GoMix is a real server, and in real servers interactions with
 // the db are placed in handler functions, to be called when some event happens
@@ -75,10 +88,21 @@ var Person /* = <Your Model> */
 //    ...do your stuff here...
 // });
 
-var createAndSavePerson = function(done) {
-  
-  done(null /*, data*/);
+var jeff = new Person({
+  name: 'Jeff', 
+  age : 32,
+  favoriteFoods: ['Spaghetti', 'Lobster', 'Scallops']
+});
 
+
+
+var createAndSavePerson = function(done) {
+  jeff.save(function(err, data)  {
+    if (err) {
+      return done(err);
+    }
+    return done(null, data);
+  });
 };
 
 /** 4) Create many People with `Model.create()` */
@@ -90,10 +114,25 @@ var createAndSavePerson = function(done) {
 // Create many people using `Model.create()`, using the function argument
 // 'arrayOfPeople'.
 
+var julia = new Person({
+  name: 'Julia',
+  age: 10,
+  favoriteFoods: ['Pizza', 'Donuts']
+});
+
+var victoria = new Person({
+  name: 'Victoria', 
+  age: 5,
+  favoriteFoods: ['Oreos', 'Beef', 'Popcorn']
+});
+
 var createManyPeople = function(arrayOfPeople, done) {
-    
-    done(null/*, data*/);
-    
+    Person.create(arrayOfPeople, function(err, data) {
+      if (err) {
+        return done(err);
+      }
+    return done(null, data);
+    });
 };
 
 /** # C[R]UD part II - READ #
@@ -108,9 +147,12 @@ var createManyPeople = function(arrayOfPeople, done) {
 // Use the function argument `personName` as search key.
 
 var findPeopleByName = function(personName, done) {
-  
-  done(null/*, data*/);
-
+  Person.find(personName.name, function(err, data) {
+    if (err) {
+      return done(err);
+    }
+    return done(null, data);
+  });
 };
 
 /** 6) Use `Model.findOne()` */
