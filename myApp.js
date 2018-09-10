@@ -165,9 +165,12 @@ var findPeopleByName = function(personName, done) {
 // argument `food` as search key
 
 var findOneByFood = function(food, done) {
-
-  done(null/*, data*/);
-  
+  Person.findOne(food.food, function(err, data) {
+    if (err) {
+      return done(err);
+    }
+    return done(null, data);
+  });
 };
 
 /** 7) Use `Model.findById()` */
@@ -180,9 +183,12 @@ var findOneByFood = function(food, done) {
 // Use the function argument 'personId' as search key.
 
 var findPersonById = function(personId, done) {
-  
-  done(null/*, data*/);
-  
+  Person.findById(personId, function(err, data) {
+    if (err) {
+      return done(err);
+    }
+    return done(null, data);
+  });
 };
 
 /** # CR[U]D part III - UPDATE # 
@@ -212,10 +218,21 @@ var findPersonById = function(personId, done) {
 
 var findEditThenSave = function(personId, done) {
   var foodToAdd = 'hamburger';
-  
-  done(null/*, data*/);
+  Person.findById(personId, function(err, data) {
+    if (err) {
+      return done(err);
+    }
+    data.favoriteFoods.push(foodToAdd);
+    
+    data.save(function(err){
+      if (err) {
+        done(err);
+      }
+      return done(null, data);
+    });
+  });
 };
-
+      
 /** 9) New Update : Use `findOneAndUpdate()` */
 
 // Recent versions of `mongoose` have methods to simplify documents updating.
@@ -233,8 +250,14 @@ var findEditThenSave = function(personId, done) {
 
 var findAndUpdate = function(personName, done) {
   var ageToSet = 20;
-
-  done(null/*, data*/);
+  Person.findOneAndUpdate(
+    {"name":personName}, 
+    {$set:{'age':ageToSet}},{new : true}, function(err,data) {
+      if(err){
+        return done(err);
+      }
+      return done(null, data);
+    });
 };
 
 /** # CRU[D] part IV - DELETE #
@@ -248,10 +271,16 @@ var findAndUpdate = function(personName, done) {
 // As usual, use the function argument `personId` as search key.
 
 var removeById = function(personId, done) {
-  
-  done(null/*, data*/);
-    
+  Person.findOneAndRemove(
+    {'_id':personId},
+    function(err, data) {
+      if(err) {
+        return done(err);
+      }
+      return done(null, data);
+    });
 };
+
 
 /** 11) Delete many People */
 
@@ -265,8 +294,14 @@ var removeById = function(personId, done) {
 
 var removeManyPeople = function(done) {
   var nameToRemove = "Mary";
-
-  done(null/*, data*/);
+  Person.remove(
+    {'name' : nameToRemove},
+    function(err, data) {
+      if(err) {
+        return done(err);
+      }
+      return done(null, data);
+    });
 };
 
 /** # C[R]UD part V -  More about Queries # 
@@ -289,8 +324,15 @@ var removeManyPeople = function(done) {
 
 var queryChain = function(done) {
   var foodToSearch = "burrito";
-  
-  done(null/*, data*/);
+  Person.find({'favoriteFoods' : foodToSearch}, {'age': 0})
+  .sort({'name':1})
+  .limit(2)
+  .exec(function(err, data) {
+    if(err) {
+      return done(err);
+    }
+    return done(null, data);
+  });
 };
 
 /** **Well Done !!**
